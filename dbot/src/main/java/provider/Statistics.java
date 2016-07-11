@@ -136,9 +136,10 @@ public class Statistics extends Thread {
 	}
 
 	
-	public void logKarmaGenerated() {
+	public void logKarma(String action) {
 		Point karma = Point.measurement("karma")
 				.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+				.addField("action", action)
 				.build();
 		
 		batchPoints.point(karma);

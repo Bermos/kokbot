@@ -29,6 +29,7 @@ import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.utils.AvatarUtil;
 import net.dv8tion.jda.utils.AvatarUtil.Avatar;
+import provider.Statistics;
 
 interface PMCommand {
 	void runCommand(PrivateMessageReceivedEvent event, String[] args);
@@ -458,8 +459,10 @@ public class Commands {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
 				Karma karma = new Karma();
 				for (User user : event.getMessage().getMentionedUsers()) {
-					if (karma.give(event.getAuthor().getId(), user.getId()))
+					if (karma.give(event.getAuthor().getId(), user.getId())) {
 						event.getChannel().sendMessageAsync(user.getUsername() + ", you received karma from " + event.getAuthorName() + ". Keep up the positive spirit.", null);
+						Statistics.getInstance().logKarma("give");
+					}
 				}
 			}
 			

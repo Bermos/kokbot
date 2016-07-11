@@ -13,6 +13,7 @@ import java.util.Map;
 
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
+import provider.Statistics;
 
 public class Karma {
 	private static Long lastLeaderboardOut = (long) 0;
@@ -39,6 +40,9 @@ public class Karma {
 							event.getChannel().sendMessageAsync("Trying to give yourself karma. Shame!", null);
 							karmaReceiverIDs.remove(user.getId());
 							karmaReceiverNames.remove(user.getUsername());
+							Statistics.getInstance().logKarma("self_karma");
+						} else {
+							Statistics.getInstance().logKarma("generated");
 						}
 					}
 					increase(karmaReceiverIDs, 1);
@@ -165,7 +169,6 @@ public class Karma {
 			e.printStackTrace();
 		}
 	}
-
 	
 	public boolean isOnCD() {
 		if(lastLeaderboardOut + (60*60*1000) > new Date().getTime())
