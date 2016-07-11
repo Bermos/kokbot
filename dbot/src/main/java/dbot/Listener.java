@@ -9,13 +9,14 @@ import net.dv8tion.jda.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
+import provider.Statistics;
 import structs.DiscordInfo;
 
 public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private Karma karma;
 	private Users users;
-	static final String VERSION_NUMBER = "1.0.8_9";
+	static final String VERSION_NUMBER = "1.0.9_10";
 	
 	public Listener() {
 		this.commands = new Commands();
@@ -30,6 +31,9 @@ public class Listener extends ListenerAdapter {
 		for (Guild guild : event.getJDA().getGuilds()) {
 			System.out.println("	" + guild.getName());
 		}
+
+		Statistics stats = Statistics.getInstance();
+		stats.connect(event.getJDA());
 	}
 	
 	@Override
@@ -72,9 +76,11 @@ public class Listener extends ListenerAdapter {
 					args[i] = args[i].trim();
 			}
 			
-			event.getChannel().sendTyping();
-			if (commands.guildCommands.containsKey(commandName))
+			if (commands.guildCommands.containsKey(commandName)) {
+				event.getChannel().sendTyping();
+				Statistics.getInstance().logCommandReceived(commandName);
 				commands.guildCommands.get(commandName).runCommand(event, args);
+			}
 		}
 		
 		//Check for karma
@@ -83,6 +89,8 @@ public class Listener extends ListenerAdapter {
 		
 		//Keep the spam in check
 		users.newMessage(event);
+		
+		Statistics.getInstance().logMessage(event);
 	}
 	
 	@Override
