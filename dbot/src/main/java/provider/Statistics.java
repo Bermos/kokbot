@@ -116,11 +116,15 @@ public class Statistics extends Thread {
 	}
 
 	public void logMessage(GuildMessageReceivedEvent event) {
+		int noOfMentions = event.getMessage().getMentionedUsers().size();
+		if (event.getMessage().mentionsEveryone())
+			noOfMentions = event.getGuild().getUsers().size();
+		
 		Point messages = Point.measurement("messages")
 				.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
 				.addField("content_length", event.getMessage().getContent().length())
-				.addField("author", event.getAuthor().getUsername())
 				.addField("channel", event.getChannel().getName())
+				.addField("no_mentions", noOfMentions)
 				.build();
 		
 		batchPoints.point(messages);
