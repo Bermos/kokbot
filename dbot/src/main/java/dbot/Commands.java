@@ -220,10 +220,14 @@ public class Commands {
 					return;
 				}
 				
+				String game = "";
 				if (args.length == 0)
 					event.getJDA().getAccountManager().setGame(null);
-				else
+				else {
+					game = args[0];
 					event.getJDA().getAccountManager().setGame(args[0]);
+				}
+				info.setGame(game);
 				event.getChannel().sendMessageAsync("[Success] Game changed", null);
 			}
 			

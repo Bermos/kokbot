@@ -47,8 +47,12 @@ public class Karma {
 					}
 					increase(karmaReceiverIDs, 1);
 					resetCD(karmaGiverID);
-					if (karmaReceiverIDs.size() > 0)
-						event.getChannel().sendMessageAsync("You da man, " + String.join(", ", karmaReceiverNames) + ". Your karma goes up!", null);
+					if (karmaReceiverIDs.size() > 0) {
+						if (karmaReceiverIDs.size() == 1 && karmaReceiverIDs.get(0).equals(event.getJDA().getSelfInfo().getId()))
+							event.getChannel().sendMessageAsync("Aww yiss, sweet karma for me!", null);
+						else
+							event.getChannel().sendMessageAsync("Nice one, " + String.join(", ", karmaReceiverNames) + ". Your karma goes up!", null);
+					}
 				}
 			} else {
 				newUser(event);

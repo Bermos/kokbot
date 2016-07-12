@@ -26,6 +26,7 @@ public class DiscordInfo {
 		String newMember;
 		String adminChanID;
 		String welcomeChanID;
+		String game;
 	}
 	
 	private void getInfo() throws FileNotFoundException {
@@ -38,6 +39,8 @@ public class DiscordInfo {
 	private void setInfo() throws IOException {
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		JsonWriter jWriter = new JsonWriter(new FileWriter("./discord.json"));
+		jWriter.setHtmlSafe(false);
+		jWriter.setIndent("	");	
 		gson.toJson(info, Info.class, jWriter);
 		jWriter.close();
 	}
@@ -203,5 +206,27 @@ public class DiscordInfo {
 			getInfo();
 		info.welcomeChanID = id;
 		setInfo();
+	}
+
+	
+	public String getGame() {
+		if (info == null) {
+			try {
+				getInfo();
+			} catch (FileNotFoundException e) {
+			}
+		}
+		return info.game;
+	}
+	
+	public void setGame(String game) {
+		try {
+			if (info == null)
+				getInfo();
+			info.game = game;
+			setInfo();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
