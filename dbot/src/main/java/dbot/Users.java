@@ -19,7 +19,7 @@ public class Users {
 		User author = null;
 		Karma karma = new Karma();
 		
-		if (event.getAuthor().equals(event.getJDA().getSelfInfo()))
+		if (event.getAuthor().isBot())
 			return;
 		
 		for (User user : users) {
