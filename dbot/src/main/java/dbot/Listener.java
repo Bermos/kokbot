@@ -16,7 +16,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private Karma karma;
 	private Users users;
-	static final String VERSION_NUMBER = "1.0.11_12";
+	static final String VERSION_NUMBER = "1.0.13_13";
 	
 	public Listener() {
 		this.commands = new Commands();
@@ -100,7 +100,9 @@ public class Listener extends ListenerAdapter {
 		DiscordInfo info = new DiscordInfo();
 		try {
 			TextChannel channel = event.getJDA().getTextChannelById(info.getWelcomeChannelID());
-			channel.sendMessageAsync(info.getNewMemberInfo().replaceAll("<user>", event.getUser().getUsername()), null);
+			channel.sendMessageAsync(info.getNewMemberInfo()
+					.replaceAll("@<user>", event.getUser().getAsMention())
+					.replaceAll("<user>", event.getUser().getUsername()), null);
 		} catch (FileNotFoundException e) {
 			event.getGuild().getPublicChannel().sendMessageAsync("[Error] Couldn't find the new member message, sorry. ", null);
 		}

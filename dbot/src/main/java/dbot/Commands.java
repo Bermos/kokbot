@@ -306,7 +306,9 @@ public class Commands {
 				
 				try {
 					if (args.length == 0) {
-						event.getChannel().sendMessageAsync(info.getNewMemberInfo().replaceAll("<user>", event.getAuthorName()), null);
+						event.getChannel().sendMessageAsync(info.getNewMemberInfo()
+								.replaceAll("@<user>", event.getAuthor().getAsMention())
+								.replaceAll("<user>", event.getAuthorName()), null);
 					}
 					else if (args.length == 1) {
 						event.getChannel().sendMessageAsync("[Error] channel or message missing", null);
