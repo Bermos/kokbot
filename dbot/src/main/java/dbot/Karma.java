@@ -19,7 +19,7 @@ public class Karma {
 	private static Long lastLeaderboardOut = (long) 0;
 	
 	public void generateNew(GuildMessageReceivedEvent event) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("SELECT * FROM users WHERE userid = ?");
@@ -66,7 +66,7 @@ public class Karma {
 	
 	public Map<String, String> getLeaderboard() {
 		Map<String, String> leaderboard = new LinkedHashMap<String, String>();
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("SELECT userid, karma FROM users ORDER BY karma DESC LIMIT 5");
@@ -94,7 +94,7 @@ public class Karma {
 	}
 	
 	private void newUser(GuildMessageReceivedEvent event) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("INSERT INTO users (userid) VALUES (?)");
@@ -107,7 +107,7 @@ public class Karma {
 	}
 
 	public void increase(List<String> karmaReceiverIDs, int ammount) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			for (String id : karmaReceiverIDs) {
@@ -130,7 +130,7 @@ public class Karma {
 	}
 	
 	public boolean decrease(String userID, int ammount) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 	
 		try {
 			PreparedStatement ps = connect.prepareStatement("UPDATE users SET karma = karma - ? WHERE userid = ?");
@@ -154,7 +154,7 @@ public class Karma {
 	}
 
 	private void resetCD(String karmaGiverID) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("UPDATE users SET lastkarmagenerated = ? WHERE userid = ?");
@@ -181,7 +181,7 @@ public class Karma {
 	}
 
 	public void pmLeaderboard(GuildMessageReceivedEvent event) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		String message = "Complete Leaderboard:\n";
 		message += "```Karma | User\n";
 		message += "--------------------------------------------\n";
@@ -203,7 +203,7 @@ public class Karma {
 	}
 
 	public String getKarmaFor(String id) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		String points = "0";
 		
 		try {

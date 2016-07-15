@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -17,7 +18,7 @@ public class Connections {
 		String PW;
 	}
 	
-	private void connect() {
+	private static void connect() {
 		Gson gson = new Gson();
 		
 		try {
@@ -37,10 +38,18 @@ public class Connections {
 		}
 	}
 	
-	public Connection getConnection() {
+	public static Connection getConnection() {
 		if (SQLConnection == null) {
 			connect();
-		}
+		} else
+			try {
+				if (SQLConnection.isClosed()) {
+					SQLConnection = null;
+					connect();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		
 		return SQLConnection;
 	}

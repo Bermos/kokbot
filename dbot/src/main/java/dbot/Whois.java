@@ -22,7 +22,7 @@ public class Whois {
 	}
 
 	public String getInfo(String name) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		String message = "";
 		
 		try {
@@ -121,7 +121,7 @@ public class Whois {
 	}
 	
 	private void editEntryName(String args) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("INSERT INTO whois (name) VALUES (?)");
@@ -135,7 +135,7 @@ public class Whois {
 	}
 	
 	private boolean editEntry(String field, String arg, String name) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("UPDATE whois SET field = ? WHERE name = ?".replaceAll("field", field));
@@ -177,7 +177,7 @@ public class Whois {
 	}
 
 	public boolean delEntry(String args) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("DELETE FROM whois WHERE name = ?");

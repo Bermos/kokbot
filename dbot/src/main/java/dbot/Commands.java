@@ -76,7 +76,7 @@ public class Commands {
 			public void runCommand(PrivateMessageReceivedEvent event, String[] args) {
 				try {
 					if (args.length == 0) { // default case. Just list all notes
-						PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM notes WHERE userid = ?");
+						PreparedStatement ps = Connections.getConnection().prepareStatement("SELECT * FROM notes WHERE userid = ?");
 						ps.setString(1, event.getAuthor().getId());
 						ResultSet rs = ps.executeQuery();
 						
@@ -90,7 +90,7 @@ public class Commands {
 							event.getChannel().sendMessageAsync("No notes found", null);
 					}	
 					else if (args[0].equals("add")) { // add case. Create a new note
-						PreparedStatement ps = new Connections().getConnection().prepareStatement("INSERT INTO notes(name, content, userid) VALUES(?, ?, ?)") ;
+						PreparedStatement ps = Connections.getConnection().prepareStatement("INSERT INTO notes(name, content, userid) VALUES(?, ?, ?)") ;
 						ps.setString(1, args[1].trim());
 						ps.setString(2, args[2].trim());
 						ps.setString(3, event.getAuthor().getId());
@@ -99,7 +99,7 @@ public class Commands {
 						event.getChannel().sendMessageAsync("Note saved", null);
 					}
 					else if (args[0].equals("del")) { // delete case. Delete note with that name
-						PreparedStatement ps = new Connections().getConnection().prepareStatement("DELETE FROM notes WHERE name = ? AND userid = ?") ;
+						PreparedStatement ps = Connections.getConnection().prepareStatement("DELETE FROM notes WHERE name = ? AND userid = ?") ;
 						ps.setString(1, args[1]);
 						ps.setString(2, event.getAuthor().getId());
 						int rowsUpdated = ps.executeUpdate();
@@ -112,7 +112,7 @@ public class Commands {
 					else {
 						if (args[0].equals("view"))
 							args[0] = args[1];
-						PreparedStatement ps = new Connections().getConnection().prepareStatement("SELECT * FROM notes WHERE name = ?");
+						PreparedStatement ps = Connections.getConnection().prepareStatement("SELECT * FROM notes WHERE name = ?");
 						ps.setString(1, args[0]);
 						ResultSet rs = ps.executeQuery();
 						

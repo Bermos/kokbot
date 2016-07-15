@@ -22,7 +22,7 @@ public class Whoare {
 	}
 
 	public String getInfo(String name) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		String message = "";
 		
 		try {
@@ -106,7 +106,7 @@ public class Whoare {
 	}
 	
 	private boolean editEntry(String field, String args, String name) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("UPDATE whoare SET field = ? WHERE name = ?".replaceAll("field", field));
@@ -126,7 +126,7 @@ public class Whoare {
 	}
 	
 	private void editEntryName(String name) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("INSERT INTO whoare (name) VALUES (?)");
@@ -158,7 +158,7 @@ public class Whoare {
 	}
 	
 	public boolean delEntry(String args) {
-		Connection connect = new Connections().getConnection();
+		Connection connect = Connections.getConnection();
 		
 		try {
 			PreparedStatement ps = connect.prepareStatement("DELETE FROM whoare WHERE name = ?");
