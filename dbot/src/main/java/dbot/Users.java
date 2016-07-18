@@ -1,14 +1,26 @@
 package dbot;
 
+import java.io.FileNotFoundException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
+import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
+import structs.DiscordInfo;
 
-public class Users {
+public class Users extends TimerTask {
 	List<User> users = new ArrayList<User>();
+	private JDA jda;
 	class User {
 		String id;
 		List<OffsetDateTime> messageTimes = new ArrayList<OffsetDateTime>();
@@ -82,6 +94,60 @@ public class Users {
 		}
 		
 		return false;
+	}
+
+	public static void squireNew(net.dv8tion.jda.entities.User user) {
+		try {
+			PreparedStatement ps = Connections.getConnection().prepareStatement("INSERT INTO squires (squireid, addtime) VALUES (?, ?)");
+			ps.setString(1, user.getId());
+			ps.setLong(2, new Date(System.currentTimeMillis()).getTime());
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void squireRemoved(net.dv8tion.jda.entities.User user) {
+		PreparedStatement ps;
+		try {
+			ps = Connections.getConnection().prepareStatement("DELETE FROM squires WHERE squireid = ?");
+			ps.setString(1, user.getId());
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void startUserCheck(JDA jda) {
+		this.jda = jda;
+		TimerTask timerTask = new Users();
+		Timer timer = new Timer();
+		Calendar today = Calendar.getInstance();
+		today.set(Calendar.HOUR_OF_DAY, 20);
+		today.set(Calendar.MINUTE, 0);
+		today.set(Calendar.SECOND, 0);
+		
+		timer.scheduleAtFixedRate(timerTask, today.getTime(), TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
+	}
+	
+	@Override
+	public void run() {
+		try {
+			PreparedStatement ps = Connections.getConnection().prepareStatement("SELECT * FROM squires");
+			ResultSet rs = ps.executeQuery();
+			
+			Long now = new Date().getTime();
+			while (rs.next()) {
+				if ((rs.getLong("addtime") + TimeUnit.MILLISECONDS.convert(14, TimeUnit.DAYS)) < now) {
+					jda.getTextChannelById(new DiscordInfo().getAdminChanID()).sendMessageAsync("@everyone. " + jda.getUserById(rs.getString("squireid")) + " has been a squire for over 2 weeks now.", null); 
+					squireRemoved(jda.getUserById(rs.getString("squireid")));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

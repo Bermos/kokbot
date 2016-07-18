@@ -3,9 +3,12 @@ package dbot;
 import java.io.FileNotFoundException;
 
 import net.dv8tion.jda.entities.Guild;
+import net.dv8tion.jda.entities.Role;
 import net.dv8tion.jda.entities.TextChannel;
 import net.dv8tion.jda.events.ReadyEvent;
 import net.dv8tion.jda.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.events.guild.member.GuildMemberRoleAddEvent;
+import net.dv8tion.jda.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.hooks.ListenerAdapter;
@@ -16,7 +19,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private Karma karma;
 	private Users users;
-	static final String VERSION_NUMBER = "1.0.14_15";
+	static final String VERSION_NUMBER = "1.1.0_17";
 	
 	public Listener() {
 		this.commands = new Commands();
@@ -32,6 +35,7 @@ public class Listener extends ListenerAdapter {
 			System.out.println("	" + guild.getName());
 		}
 
+		new Users().startUserCheck(event.getJDA());
 		Statistics stats = Statistics.getInstance();
 		stats.connect(event.getJDA());
 		
@@ -68,7 +72,7 @@ public class Listener extends ListenerAdapter {
 												event.getMessage().getContent());
 		
 		//Check for command
-		if (event.getMessage().getContent().startsWith("/") && !event.getAuthor().equals(event.getJDA().getSelfInfo())) {
+		if (event.getMessage().getContent().startsWith("/") && !event.getAuthor().isBot()) {
 			String content = event.getMessage().getContent();
 			String commandName = content.replaceFirst("/", "").split(" ")[0];
 			String[] args = {};
@@ -86,7 +90,8 @@ public class Listener extends ListenerAdapter {
 		}
 		
 		//Check for karma
-		if (event.getMessage().getContent().toLowerCase().contains("thanks") && !event.getMessage().getMentionedUsers().isEmpty())
+		if ((event.getMessage().getContent().toLowerCase().contains("thanks") || event.getMessage().getContent().toLowerCase().contains("thank you"))
+				&& !event.getMessage().getMentionedUsers().isEmpty() && !event.getAuthor().isBot())
 			karma.generateNew(event);
 		
 		//Keep the spam in check
@@ -108,4 +113,20 @@ public class Listener extends ListenerAdapter {
 		}
 	}
 
+	@Override
+	public void onGuildMemberRoleAdd(GuildMemberRoleAddEvent event) {
+		for (Role role : event.getRoles()) {
+			if (role.getName().equals("Squire"))
+				Users.squireNew(event.getUser());
+		}
+	}
+	
+	@Override
+	public void onGuildMemberRoleRemove(GuildMemberRoleRemoveEvent event) {
+		for (Role role : event.getRoles()) {
+			if (role.getName().equals("Squire"))
+				Users.squireRemoved(event.getUser());
+		}
+	}
+	
 }
