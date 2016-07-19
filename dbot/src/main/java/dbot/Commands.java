@@ -482,7 +482,7 @@ public class Commands {
 				Karma karma = new Karma();
 				
 				if (args.length == 0)
-					event.getChannel().sendMessageAsync("You've got " + karma.getKarmaFor(event.getAuthor().getId()) + " karma.", null);
+					event.getChannel().sendMessageAsync("You've got " + karma.getKarmaFor(event.getAuthor().getId()) + " karma, " + event.getAuthor().getAsMention(), null);
 				else {
 					//Permission check
 					DiscordInfo info = new DiscordInfo();
