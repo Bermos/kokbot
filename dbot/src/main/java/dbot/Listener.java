@@ -19,7 +19,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private Karma karma;
 	private Users users;
-	static final String VERSION_NUMBER = "1.1.1_18";
+	static final String VERSION_NUMBER = "1.1.2_19";
 	
 	public Listener() {
 		this.commands = new Commands();
@@ -90,7 +90,9 @@ public class Listener extends ListenerAdapter {
 		}
 		
 		//Check for karma
-		if ((event.getMessage().getContent().toLowerCase().contains("thanks") || event.getMessage().getContent().toLowerCase().contains("thank you"))
+		if ((event.getMessage().getContent().toLowerCase().contains("thanks")
+				|| event.getMessage().getContent().toLowerCase().contains("thank you")
+				|| event.getMessage().getContent().toLowerCase().contains("cheers"))
 				&& !event.getMessage().getMentionedUsers().isEmpty() && !event.getAuthor().isBot())
 			karma.generateNew(event);
 		
