@@ -138,7 +138,7 @@ public class Commands {
 						message += String.format("/%1$-12s | " + entry.getValue().getHelp(event) + "\n", entry.getKey());
 				}
 				message += "```";
-				event.getChannel().sendMessageAsync(message, null);
+				event.getAuthor().getPrivateChannel().sendMessageAsync(message, null);
 			}
 			
 			public String getHelp(GuildMessageReceivedEvent event) {
