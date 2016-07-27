@@ -246,6 +246,7 @@ public class Commands {
 					event.getChannel().sendMessageAsync("[Error] Not enough systems specified", null);
 					return;
 				}
+				boolean failed = false;
 				Gson gson = new Gson();
 				EDSystem sys1 = null;
 				EDSystem sys2 = null;
@@ -261,18 +262,30 @@ public class Commands {
 					jsonSys1 = docSys1.body().text();
 					jsonSys2 = docSys2.body().text();
 					
-					if (jsonSys1.contains("[]") || jsonSys2.contains("[]")) {
-						event.getChannel().sendMessageAsync("[Error] System not found or coordinates not in db.", null);
-						return;
+					if (jsonSys1.contains("[]")) {
+						event.getChannel().sendMessageAsync(args[0].trim().toUpperCase() + " not found.", null);
+						failed = true;
 					}
+					if (jsonSys2.contains("[]")) {
+						event.getChannel().sendMessageAsync(args[1].trim().toUpperCase() + " not found.", null);
+						failed = true;
+					}
+					if (failed)
+						return;
 					
 					sys1 = gson.fromJson(jsonSys1, EDSystem.class);
 					sys2 = gson.fromJson(jsonSys2, EDSystem.class);
 					
-					if (sys1.coords == null || sys2.coords == null) {
-						event.getChannel().sendMessageAsync("[Error] System not found or coordinates not in db.", null);
-						return;
+					if (sys1.coords == null) {
+						event.getChannel().sendMessageAsync(args[0].trim().toUpperCase() + " found but coordinates not in db.", null);
+						failed = true;
 					}
+					if (sys2.coords == null) {
+						event.getChannel().sendMessageAsync(args[1].trim().toUpperCase() + " found but coordinates not in db.", null);
+						failed = true;
+					}
+					if (failed)
+						return;
 					
 					float x = sys2.coords.x - sys1.coords.x;
 					float y = sys2.coords.y - sys1.coords.y;

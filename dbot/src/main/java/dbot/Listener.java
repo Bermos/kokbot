@@ -19,7 +19,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private Karma karma;
 	private Users users;
-	static final String VERSION_NUMBER = "1.1.3_20";
+	static final String VERSION_NUMBER = "1.1.4_21";
 	
 	public Listener() {
 		this.commands = new Commands();
