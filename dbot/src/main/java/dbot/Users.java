@@ -6,10 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -18,9 +19,9 @@ import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import structs.DiscordInfo;
 
-public class Users extends TimerTask {
+public class Users {
 	List<User> users = new ArrayList<User>();
-	private JDA jda;
+	public JDA jda;
 	class User {
 		String id;
 		List<OffsetDateTime> messageTimes = new ArrayList<OffsetDateTime>();
@@ -107,46 +108,110 @@ public class Users extends TimerTask {
 		}
 	}
 
-	public static void squireRemoved(net.dv8tion.jda.entities.User user) {
+	public static void squireRemoved(String userid) {
 		PreparedStatement ps;
 		try {
 			ps = Connections.getConnection().prepareStatement("DELETE FROM squires WHERE squireid = ?");
-			ps.setString(1, user.getId());
+			ps.setString(1, userid);
 			ps.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void startUserCheck(JDA jda) {
-		this.jda = jda;
-		TimerTask timerTask = new Users();
-		Timer timer = new Timer();
-		Calendar today = Calendar.getInstance();
-		today.set(Calendar.HOUR_OF_DAY, 20);
-		today.set(Calendar.MINUTE, 0);
-		today.set(Calendar.SECOND, 0);
-		
-		timer.scheduleAtFixedRate(timerTask, today.getTime(), TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
+	public static void squireNoticeSent(String userid, int days) {
+		PreparedStatement ps;
+		try {
+			String notice = days + "_d_notice";
+			ps = Connections.getConnection().prepareStatement("UPDATE squires SET " + notice + " = 1 WHERE squireid = ?");
+			ps.setString(1, userid);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	@Override
-	public void run() {
+	public static Map<String, String> squireList() {
+		Map<String, String> squires = new LinkedHashMap<String, String>();
+		
 		try {
-			PreparedStatement ps = Connections.getConnection().prepareStatement("SELECT * FROM squires");
+			PreparedStatement ps = Connections.getConnection().prepareStatement("SELECT * FROM squires ORDER BY addtime ASC");
 			ResultSet rs = ps.executeQuery();
 			
-			Long now = new Date().getTime();
 			while (rs.next()) {
-				if ((rs.getLong("addtime") + TimeUnit.MILLISECONDS.convert(14, TimeUnit.DAYS)) < now) {
-					jda.getTextChannelById(new DiscordInfo().getAdminChanID()).sendMessageAsync("@everyone. " + jda.getUserById(rs.getString("squireid")) + " has been a squire for over 2 weeks now.", null); 
-					squireRemoved(jda.getUserById(rs.getString("squireid")));
-				}
+				squires.put(rs.getString("squireid"), rs.getString("addtime"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		}
+		
+		return squires;
+	}
+	
+	public void startUserCheck(JDA jda) {
+		Timer timer = new Timer();
+		//Calendar today = Calendar.getInstance();
+		//today.set(Calendar.HOUR_OF_DAY, 20);
+		//today.set(Calendar.MINUTE, 0);
+		//today.set(Calendar.SECOND, 0);
+		
+		timer.scheduleAtFixedRate(new CheckTask(jda), new Date(), TimeUnit.MILLISECONDS.convert(1, TimeUnit.HOURS));
+	}
+	
+	class CheckTask  extends TimerTask {
+		private JDA jda;
+		
+		public CheckTask(JDA jda) {
+			this.jda = jda;
+			boolean initialised = jda != null;
+			System.out.println("jda initialised: " + initialised);
+		}
+
+		@Override
+		public void run() {
+			try {
+				System.out.println("Squire check started...");
+				PreparedStatement ps = Connections.getConnection().prepareStatement("SELECT * FROM squires WHERE 14_d_notice = 0 OR 30_d_notice = 0");
+				ResultSet rs = ps.executeQuery();
+				
+				Long now = new Date().getTime();
+				while (rs.next()) {
+					if ((rs.getLong("addtime") + TimeUnit.MILLISECONDS.convert(14, TimeUnit.DAYS)) < now && !rs.getBoolean("14_d_notice")) {
+						net.dv8tion.jda.entities.User user = jda.getUserById(rs.getString("squireid"));
+						if (user == null) {
+							squireRemoved(rs.getString("squireid"));
+							return; 
+						} else if (user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) == null) {
+							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
+							.sendMessageAsync("@-everyone. " + user.getUsername() + " has been a squire for over 2 weeks now.", null);
+							
+						} else {
+							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
+							.sendMessageAsync("@-everyone. " + user.getUsername() + "(" + user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) + ") has been a squire for over 2 weeks now.", null);
+						}
+						squireNoticeSent(rs.getString("squireid"), 14);
+					} else if ((rs.getLong("addtime") + TimeUnit.MILLISECONDS.convert(30, TimeUnit.DAYS)) < now && !rs.getBoolean("30_d_notice")) {
+						net.dv8tion.jda.entities.User user = jda.getUserById(rs.getString("squireid"));
+						if (user == null) {
+							squireRemoved(rs.getString("squireid"));
+							return; 
+						} else if (user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) == null) {
+							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
+							.sendMessageAsync("@-everyone. " + user.getUsername() + " has been a squire for over 30 days now.", null);
+							
+						} else {
+							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
+							.sendMessageAsync("@-everyone. " + user.getUsername() + "(" + user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) + ") has been a squire for over 30 days now.", null);
+						}
+						squireNoticeSent(rs.getString("squireid"), 30);
+					}
+				}
+				System.out.println("Squire check finished");
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -8,9 +8,12 @@ import java.net.SocketException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -712,6 +715,45 @@ public class Commands {
 				if (!(info.isOwner(event.getAuthor().getId()) || info.isAdmin(event.getGuild().getRolesForUser(event.getAuthor()))))
 					return "<name> - shows the available information about that group";
 				return "<name>|<add>|<del>, <name?> - show, add* or delete* information about a group";
+			}
+		});
+
+		guildCommands.put("squires", new GuildCommand() {
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				DiscordInfo info = new DiscordInfo();
+				
+				//Permission check
+				if (!(info.isOwner(event.getAuthor().getId()) || info.isAdmin(event.getGuild().getRolesForUser(event.getAuthor())))) {
+					event.getChannel().sendMessageAsync("[Error] You aren't authorized to do this", null);
+					return;
+				}
+				try {
+					SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+					sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+					String output = "Squires:\n```";
+					for (Map.Entry<String, String> entry : Users.squireList().entrySet()) {
+						if (event.getJDA().getUserById(entry.getKey()) == null)
+							continue;
+						
+						String username = event.getJDA().getUserById(entry.getKey()).getUsername();
+						if (event.getGuild().getNicknameForUser(event.getJDA().getUserById(entry.getKey())) != null)
+							username += " (" + event.getGuild().getNicknameForUser(event.getJDA().getUserById(entry.getKey())) + ")";
+						output += sdf.format(new Date(Long.parseLong(entry.getValue()))) + ": " + username + "\n";
+					}
+					output += "```";
+					
+					event.getJDA().getTextChannelById(info.getAdminChanID()).sendMessageAsync(output, null);
+				} catch (IOException e) {
+					event.getChannel().sendMessageAsync("[Error] Couldn't read required file", null);
+				}
+			}
+			
+			public String getHelp(GuildMessageReceivedEvent event) {
+				//Permission check
+				DiscordInfo info = new DiscordInfo();
+				if (!(info.isOwner(event.getAuthor().getId()) || info.isAdmin(event.getGuild().getRolesForUser(event.getAuthor()))))
+					return "";
+				return "gives a list of all the squires";
 			}
 		});
 		//end of commands

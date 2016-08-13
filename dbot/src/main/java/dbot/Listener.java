@@ -19,7 +19,7 @@ public class Listener extends ListenerAdapter {
 	private Commands commands;
 	private Karma karma;
 	private Users users;
-	static final String VERSION_NUMBER = "1.1.4_21";
+	static final String VERSION_NUMBER = "1.1.6_23";
 	
 	public Listener() {
 		this.commands = new Commands();
@@ -35,7 +35,7 @@ public class Listener extends ListenerAdapter {
 			System.out.println("	" + guild.getName());
 		}
 
-		new Users().startUserCheck(event.getJDA());
+		users.startUserCheck(event.getJDA());
 		Statistics stats = Statistics.getInstance();
 		stats.connect(event.getJDA());
 		
@@ -127,7 +127,7 @@ public class Listener extends ListenerAdapter {
 	public void onGuildMemberRoleRemove(GuildMemberRoleRemoveEvent event) {
 		for (Role role : event.getRoles()) {
 			if (role.getName().equals("Squire"))
-				Users.squireRemoved(event.getUser());
+				Users.squireRemoved(event.getUser().getId());
 		}
 	}
 	
