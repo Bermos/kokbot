@@ -311,6 +311,19 @@ public class Commands {
 			}
 		});
 
+		guildCommands.put("time", new GuildCommand() {
+			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
+				Date date = new Date();
+				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+				event.getChannel().sendMessageAsync("UTC time:\n" + sdf.format(date), null);
+			}
+			
+			public String getHelp(GuildMessageReceivedEvent event) {
+				return "UTC date & time now";
+			}
+		});
+		
 		guildCommands.put("new", new GuildCommand() {
 			public void runCommand(GuildMessageReceivedEvent event, String[] args) {
 				DiscordInfo info = new DiscordInfo();
