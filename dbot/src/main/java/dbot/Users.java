@@ -183,11 +183,11 @@ public class Users {
 							return; 
 						} else if (user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) == null) {
 							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
-							.sendMessageAsync("@-everyone. " + user.getUsername() + " has been a squire for over 2 weeks now.", null);
+							.sendMessageAsync("@everyone. " + user.getUsername() + " has been a squire for over 2 weeks now.", null);
 							
 						} else {
 							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
-							.sendMessageAsync("@-everyone. " + user.getUsername() + "(" + user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) + ") has been a squire for over 2 weeks now.", null);
+							.sendMessageAsync("@everyone. " + user.getUsername() + "(" + user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) + ") has been a squire for over 2 weeks now.", null);
 						}
 						squireNoticeSent(rs.getString("squireid"), 14);
 					} else if ((rs.getLong("addtime") + TimeUnit.MILLISECONDS.convert(30, TimeUnit.DAYS)) < now && !rs.getBoolean("30_d_notice")) {
@@ -197,11 +197,11 @@ public class Users {
 							return; 
 						} else if (user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) == null) {
 							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
-							.sendMessageAsync("@-everyone. " + user.getUsername() + " has been a squire for over 30 days now.", null);
+							.sendMessageAsync("@everyone. " + user.getUsername() + " has been a squire for over 30 days now.", null);
 							
 						} else {
 							jda.getTextChannelById(new DiscordInfo().getAdminChanID())
-							.sendMessageAsync("@-everyone. " + user.getUsername() + "(" + user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) + ") has been a squire for over 30 days now.", null);
+							.sendMessageAsync("@everyone. " + user.getUsername() + "(" + user.getJDA().getGuildById("141575893691793408").getNicknameForUser(user) + ") has been a squire for over 30 days now.", null);
 						}
 						squireNoticeSent(rs.getString("squireid"), 30);
 					}
