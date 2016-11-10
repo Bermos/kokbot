@@ -30,6 +30,7 @@ public class Connections {
 					"/" + info.DB +
 					"?user=" + info.US +
 					"&password=" + info.PW);
+					//"&characterEncoding=utf8mb4");
 			
 		} catch (FileNotFoundException e) {
 			System.out.println("[Error] 'login.json' not found.");

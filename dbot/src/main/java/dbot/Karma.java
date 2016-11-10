@@ -11,14 +11,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vdurmont.emoji.EmojiParser;
+import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import provider.Statistics;
 
-public class Karma {
+class Karma {
 	private static Long lastLeaderboardOut = (long) 0;
 	
-	public void generateNew(GuildMessageReceivedEvent event) {
+	void generateNew(GuildMessageReceivedEvent event) {
 		Connection connect = Connections.getConnection();
 		
 		try {
@@ -30,8 +32,8 @@ public class Karma {
 				long lastKarmaGenerated = rs.getLong("lastkarmagenerated");
 				String karmaGiverID = rs.getString("userid");
 				if ((new Date().getTime() - lastKarmaGenerated ) > 60*60*1000) {
-					List<String> karmaReceiverIDs = new ArrayList<String>();
-					List<String> karmaReceiverNames = new ArrayList<String>();
+					List<String> karmaReceiverIDs = new ArrayList<>();
+					List<String> karmaReceiverNames = new ArrayList<>();
 					for (User user : event.getMessage().getMentionedUsers()) {
 						karmaReceiverIDs.add(user.getId());
 						karmaReceiverNames.add(user.getUsername());
@@ -64,8 +66,8 @@ public class Karma {
 		}
 	}
 	
-	public Map<String, String> getLeaderboard() {
-		Map<String, String> leaderboard = new LinkedHashMap<String, String>();
+	Map<String, String> getLeaderboard() {
+		Map<String, String> leaderboard = new LinkedHashMap<>();
 		Connection connect = Connections.getConnection();
 		
 		try {
@@ -84,7 +86,7 @@ public class Karma {
 		return leaderboard;
 	}
 
-	public boolean give(String giverID, String receiverID) {
+	boolean give(String giverID, String receiverID) {
 		if (Integer.parseInt(getKarmaFor(giverID)) > 0 ) {
 			decrease(giverID, 1);
 			increase(Arrays.asList(receiverID), 1);
@@ -97,8 +99,17 @@ public class Karma {
 		Connection connect = Connections.getConnection();
 		
 		try {
-			PreparedStatement ps = connect.prepareStatement("INSERT INTO users (userid) VALUES (?)");
+			String name = event.getAuthorName();
+			if (name != null)
+				name = EmojiParser.parseToUnicode(name);
+			String nick = event.getAuthorNick();
+			if (nick != null)
+				nick = EmojiParser.parseToUnicode(nick);
+
+			PreparedStatement ps = connect.prepareStatement("INSERT INTO users (userid, username, nickname) VALUES (?, ?, ?)");
 			ps.setString(1, event.getAuthor().getId());
+			ps.setString(2, name);
+			ps.setString(3, nick);
 			ps.executeUpdate();
 		
 		} catch (SQLException e) {
@@ -106,7 +117,7 @@ public class Karma {
 		}
 	}
 
-	public void increase(List<String> karmaReceiverIDs, int ammount) {
+	void increase(List<String> karmaReceiverIDs, int ammount) {
 		Connection connect = Connections.getConnection();
 		
 		try {
@@ -129,7 +140,7 @@ public class Karma {
 		}
 	}
 	
-	public boolean decrease(String userID, int ammount) {
+	boolean decrease(String userID, int ammount) {
 		Connection connect = Connections.getConnection();
 	
 		try {
@@ -174,13 +185,11 @@ public class Karma {
 		}
 	}
 	
-	public boolean isOnCD() {
-		if(lastLeaderboardOut + (60*60*1000) > new Date().getTime())
-			return true;
-		return false;
+	boolean isOnCD() {
+		return (lastLeaderboardOut + (60*60*1000) > new Date().getTime());
 	}
 
-	public void pmLeaderboard(GuildMessageReceivedEvent event) {
+	void pmLeaderboard(GuildMessageReceivedEvent event) {
 		Connection connect = Connections.getConnection();
 		String message = "Complete Leaderboard:\n";
 		message += "```Karma | User\n";
@@ -202,7 +211,7 @@ public class Karma {
 		}
 	}
 
-	public String getKarmaFor(String id) {
+	String getKarmaFor(String id) {
 		Connection connect = Connections.getConnection();
 		String points = "0";
 		
@@ -219,6 +228,37 @@ public class Karma {
 		}
 		
 		return points;
+	}
+
+	void updateUsernames(JDA jda) {
+		Connection connect = Connections.getConnection();
+
+		try {
+			PreparedStatement ps = connect.prepareStatement("SELECT userid FROM users");
+			ResultSet rs = ps.executeQuery();
+
+			ps = connect.prepareStatement("UPDATE users SET username = ?, nickname = ? WHERE userid = ?");
+			while (rs.next()) {
+				User user = jda.getUserById(rs.getString("userid"));
+				if (user != null) {
+					String name = user.getUsername();
+					if (name != null)
+						name = EmojiParser.parseToHtmlHexadecimal(name);
+					String nick = jda.getGuildById("141575893691793408").getNicknameForUser(user);
+					if (nick != null)
+						nick = EmojiParser.parseToHtmlHexadecimal(nick);
+
+					ps.setString(1, name);
+					ps.setString(2, nick);
+					ps.setString(3, rs.getString("userid"));
+					ps.addBatch();
+				}
+			}
+
+			ps.executeBatch();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

@@ -552,6 +552,11 @@ public class Commands {
 							event.getChannel().sendMessageAsync("User not found", null);
 						}
 					}
+					else if (args[0].equalsIgnoreCase("update")) {
+						karma.updateUsernames(event.getJDA());
+
+						event.getChannel().sendMessageAsync("Updated all names and nicknames.", null);
+					}
 				}
 			}
 			
